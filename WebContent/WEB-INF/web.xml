@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  	<display-name>GXG_E3</display-name>
+	<listener> 
+    	<listener-class>wwinfo.Startup</listener-class> 
+    </listener>  
+	  <servlet>
+		<servlet-name>RestServlet</servlet-name>
+		<servlet-class>wwinfo.RestServlet</servlet-class>
+	  </servlet>
+	  <servlet>
+		<servlet-name>RestQimen</servlet-name>
+		<servlet-class>wwinfo.RestQimen</servlet-class>
+	  </servlet>
+	  <servlet>
+		<servlet-name>AjaxPage</servlet-name>
+		<servlet-class>wwinfo.AjaxPage</servlet-class>
+	  </servlet>
+	  
+	  <servlet-mapping>
+		<servlet-name>RestServlet</servlet-name>
+		<url-pattern>/restapi</url-pattern>
+	  </servlet-mapping>
+	  <servlet-mapping>
+		<servlet-name>RestQimen</servlet-name>
+		<url-pattern>/qimencallback</url-pattern>
+	  </servlet-mapping>
+	  <servlet-mapping>
+		<servlet-name>AjaxPage</servlet-name>
+		<url-pattern>/ajaxpage.html</url-pattern>
+	  </servlet-mapping>
+
+
+
+
+	<!--<display-name>GXG_E3</display-name>
+	<listener>
+		<listener-class>wwinfo.Startup</listener-class>
+	</listener>
+	<servlet>
+		<servlet-name>RestServlet</servlet-name>
+		<servlet-class>wwinfo.RestServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>RestQimen</servlet-name>
+		<servlet-class>wwinfo.RestQimen</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>RestServlet</servlet-name>
+		<url-pattern>/restapi</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>RestQimen</servlet-name>
+		<url-pattern>/qimencallback</url-pattern>
+	</servlet-mapping>-->
+</web-app>

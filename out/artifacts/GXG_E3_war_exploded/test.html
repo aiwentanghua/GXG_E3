@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<div>
+		<label>单据号</label>
+		<input type="text" id="ordercode" />
+	</div>
+	<div>
+		<label>单据类型</label>
+		<input type="text" id="ordertype" value="CGRK"/>
+	</div>
+	<button onclick="checkFun()">提交</button>
+</body>
+</html>
+<script type=text/javascript src="jquery.min.js"></script>
+<script type="text/javascript">
+	function checkFun(){
+		var orderCode = $('#ordercode').val();
+		var orderType = $('#ordertype').val();
+		if (orderCode.length < 1 || orderType.length < 1){
+			alert('please input order code and order type');
+			return;
+		}
+		var URL = "ajaxpage.html?action=ordercancel&ordercode="+orderCode+"&ordertype="+orderType;
+		$.ajax({
+			type: "get",
+			async: false,
+			url: URL,
+			dataType: "jsonp",
+			jsonp: "callback",
+			jsonpCallback: "receive"
+		});
+	}
+
+	function receive(data){
+		if (data.status==200){
+			alert('success');
+		}else{
+			alert(data.msg);
+		}
+	}
+</script>

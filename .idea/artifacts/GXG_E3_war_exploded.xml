@@ -1,0 +1,16 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="GXG_E3:war exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/GXG_E3_war_exploded</output-path>
+    <root id="root">
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="GXG_E3" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="log4j-1.2.17" />
+        </element>
+      </element>
+      <element id="javaee-facet-resources" facet="GXG_E3/web/Web" />
+    </root>
+  </artifact>
+</component>

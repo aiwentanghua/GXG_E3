@@ -1,0 +1,927 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+
+    <insert id="inserte3_storepdt_ftp" parameterClass="java.util.HashMap">
+		--新增E3门店款号配置
+		insert into e3_storepdt_ftp
+			(c_store_id,
+			m_product_id,
+			creationdate,
+			modifieddate,
+			isactive,
+			ad_client_id,
+			ad_org_id)
+				values
+				(select id
+					from c_store
+						where code = #STORE_CODE#,
+				select id
+					from m_product
+						where name = #PRODUCT_CODE#,
+				sysdate,
+				sysdate,
+				'Y',
+				37,
+				37
+   					)
+	</insert>
+
+	<delete id="deletee3_storepdt_ftp" parameterClass="java.util.HashMap">
+		<isNotEmpty prepend="STORE_CODE" >
+		<isNotEmpty prepend="PRODUCT_CODE">
+			delete from e3_storepdt_ftp
+			where
+			c_store_id=select id
+			from c_store
+			where code =#STORE_CODE#
+			and
+			m_product_id=select id
+			from m_product
+			where name =#PRODUCT_CODE#
+		</isNotEmpty>
+	</isNotEmpty>
+	</delete>
+
+	<delete id="deleteo2o_storepro" parameterClass="java.util.HashMap">
+
+		<isNotEmpty prepend="STORE_CODE" >
+			<isNotEmpty prepend="PRODUCT_CODE">
+				delete from E3_BOS_STOREPDT
+				where
+				id=select from E3_BOS_STOREPDT
+				STORE_CODE=#STORE_CODE#
+				and
+				PRODUCT_CODE=#PRODUCT_CODE#
+			</isNotEmpty>
+		</isNotEmpty>
+	</delete>
+
+
+    <select id="geteb_orderso" resultClass="java.util.HashMap">
+		--查询o2o订单ID
+		select id from eb_orderso where eb_docno=#docno#
+
+	</select>
+
+    <parameterMap id="EB_SO_UNSUBMIT_map" class="java.util.HashMap">
+        <parameter property="p_param" javaType="java.lang.String" jdbcType="DECIMAL" mode="IN"/>
+        <parameter property="p_code" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+        <parameter property="p_message" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+    </parameterMap>
+    <!--o2o订单取消-->
+    <procedure id="procedureEB_SO_UNSUBMIT" parameterMap="EB_SO_UNSUBMIT_map">
+
+        {call EB_SO_UNSUBMIT(?,?,?)}
+
+    </procedure>
+
+    <select id="getSKUstock" resultClass="java.util.HashMap">
+
+		SELECT T.QTYCAN
+		FROM V_FA_STORAGE T
+		WHERE EXISTS (SELECT 1
+			   FROM C_STORE A
+			   WHERE T.C_STORE_ID = A.ID
+			   AND A.CODE = #order_sn#) --店仓编号
+		AND EXISTS (SELECT 1
+			   FROM M_PRODUCT_ALIAS B
+			   WHERE T.M_PRODUCT_ID = B.M_PRODUCT_ID
+			   AND T.M_ATTRIBUTESETINSTANCE_ID = B.M_ATTRIBUTESETINSTANCE_ID
+			   AND B.NO = #outer_code#) --条码编号;
+	</select>
+
+    <update id="updateD1Mc_vouchersvip" parameterClass="java.util.HashMap">
+
+		UPDATE C_VOUCHERS_VIP A SET A.C_VIPID=#vip_id# WHERE C_VOUCHERS_ID=#id#
+
+	</update>
+
+    <select id="getC_VOUCHERSID" resultClass="java.util.HashMap">
+
+		SELECT ID FROM C_VOUCHERS WHERE VOUCHERS_NO=#vouchers_no#
+
+	</select>
+
+
+    <select id="getEB_SO_UNSUBMIT" resultClass="java.util.HashMap">
+
+		SELECT ID FROM eb_orderso WHERE EB_DOCNO=#ordercode#
+
+	</select>
+
+    <update id="updateD1Mc_vouchers" parameterClass="java.util.HashMap">
+
+        UPDATE C_VOUCHERS A SET A.VOUCHERS_NO=#vouchers_no#
+        <isNotEmpty property="identify_code" prepend=",">
+            A.IDENTIFY_CODE=#identify_code#
+        </isNotEmpty>
+        <isNotEmpty property="vou_type" prepend=",">
+            A.VOU_TYPE=#vou_type#
+        </isNotEmpty>
+        <isNotEmpty property="vou_dis" prepend=",">
+            A.VOU_DIS=#vou_dis#
+        </isNotEmpty>
+        <isNotEmpty property="amt_discount" prepend=",">
+            A.AMT_DISCOUNT=#amt_discount#
+        </isNotEmpty>
+        <isNotEmpty property="amt_acount" prepend=",">
+            A.AMT_ACOUNT=#amt_acount#
+        </isNotEmpty>
+        <isNotEmpty property="start_date" prepend=",">
+            A.START_DATE=#start_date#
+        </isNotEmpty>
+        <isNotEmpty property="valid_date" prepend=",">
+            A.VALID_DATE=#valid_date#
+        </isNotEmpty>
+        <isNotEmpty property="is_valid" prepend=",">
+            A.IS_VALID=#is_valid#
+        </isNotEmpty>
+        <isNotEmpty property="is_verifyed" prepend=",">
+            A.IS_VERIFYED=#is_verifyed#
+        </isNotEmpty>
+        <isNotEmpty property="vouchers_template_no" prepend=",">
+            A.C_V_VOUCHERS_ID=(SELECT ID FROM C_VOUCHERS WHERE VOUCHERS_NO=#vouchers_template_no#)
+        </isNotEmpty>
+        WHERE A.VOUCHERS_NO=#vouchers_no#
+
+    </update>
+
+    <select id="getC_VOUCHERS" resultClass="java.util.HashMap">
+
+		SELECT A.VOUCHERS_NO,A.ID, A.VOU_TYPE, A.VOU_DIS, A.AMT_DISCOUNT, A.AMT_ACOUNT, A.START_DATE,
+        A.VALID_DATE, A.IS_VALID, A.IS_VERIFYED,B.C_VIPID,C.VOUCHERS_NO
+		FROM C_VOUCHERS A
+		LEFT JOIN C_VOUCHERS_VIP B ON B.C_VOUCHERS_ID=A.ID
+		LEFT JOIN C_VOUCHERS C ON A.C_V_VOUCHERS_ID=C.ID
+		WHERE A.VOUCHERS_NO=#vouchers_no# AND A.IS_VALID=#is_valid#
+
+
+	</select>
+
+    <parameterMap class="java.util.HashMap" id="swapParameters">
+        <parameter property="p_vouchers_no" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+        <parameter property="p_identify_code" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+        <parameter property="p_vou_type" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+        <parameter property="p_vou_dis" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+        <parameter property="p_amt_discount" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+        <parameter property="p_amt_acount" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+        <parameter property="p_start_date" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+        <parameter property="p_valid_date" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+        <parameter property="p_is_valid" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+        <parameter property="p_is_verifyed" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+        <parameter property="p_vip_id" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+        <parameter property="p_vouchers_template_no" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+        <parameter property="p_code" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+        <parameter property="p_message" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+        <parameter property="p_vouchersid" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+    </parameterMap>
+    <procedure id="procedured1m_to_bos_vouchers" parameterMap="swapParameters">
+        {call d1m_to_bos_vouchers(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}
+    </procedure>
+
+    <parameterMap id="o2oorderDelivergoods" class="java.util.HashMap">
+        <parameter property="p_param" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+        <parameter property="p_code" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+        <parameter property="p_message" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+    </parameterMap>
+
+    <procedure id="procedureo2oorderDg" parameterMap="o2oorderDelivergoods">
+
+        {call e3_to_bos_ebso(?,?,?)}
+
+    </procedure>
+
+    <select id="getC_VOUCHERSemplate" resultClass="java.util.HashMap">
+
+		select
+		VOU_TYPE,
+		ID,
+		VOUCHERS_NO,
+		AMT_NOLES,
+		IS_ALLSTORE
+		from c_vouchers
+		where
+		is_templet='Y'
+		and
+		is_valid=#is_valid#
+
+	</select>
+
+    <select id="getBOS_E3_COLOR"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_COLOR
+    	where E3STATUS=1 and ROWNUM &lt;= 1000
+    </select>
+    <select id="getBOS_E3_SIZE"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_SIZE
+    	where E3STATUS=1 and ROWNUM &lt;= 1000
+    </select>
+    <select id="getBOS_E3_SIZEGROUP"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_SIZEGROUP
+    	where E3STATUS=1 and ROWNUM &lt;= 1000
+    </select>
+    <select id="getBOS_E3_DIM"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_DIM
+    	where E3STATUS=1 and ROWNUM &lt;= 1000
+    </select>
+    <select id="getBOS_E3_PRODUCT"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_PRODUCT
+    	where E3STATUS=1 and ROWNUM &lt;= 1000
+    </select>
+    <select id="getBOS_E3_STORE"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_STORE
+    	where E3STATUS=1 and ROWNUM &lt;= 1000
+    </select>
+    <select id="getBOS_E3_SUPPLIER"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_SUPPLIER
+    	where E3STATUS=1 and ROWNUM &lt;= 1000
+    </select>
+    <select id="getBOS_E3_TRANSFER"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_TRANSFER
+    	where E3STATUS=1 and TYPE='Y' and ROWNUM &lt;= 1000
+    </select>
+    <select id="getBOS_E3_TRANSFER2"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_TRANSFER
+    	where E3STATUS=1 and TYPE='N' and ROWNUM &lt;= 1000
+    </select>
+    <select id="getBOS_E3_TRANSFERITEM" parameterClass="Long"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_TRANSFERITEM
+    	where BOS_E3_TRANSFER_ID=#value#
+    </select>
+    <select id="getBOS_E3_LOCK"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_LOCK
+    	where E3STATUS=1 and ROWNUM &lt;= 1000
+    </select>
+    <select id="getBOS_E3_LOCKITEM" parameterClass="Long"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_LOCKITEM
+    	where BOS_E3_LOCK_ID=#value#
+    </select>
+    <select id="getBOS_E3_STORAGE"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_STORAGE
+    	where E3STATUS=1 and ROWNUM &lt;= 1000
+    	order by API_FLAG
+    </select>
+
+    <select id="getBOS_E3_SKU" parameterClass="Long"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_SKU
+    	where E3STATUS=1 and ROWNUM &lt;= 1000
+    </select>
+    <select id="getBOS_E3_PURCHASE"
+            resultClass="java.util.HashMap">
+    	select distinct
+    		ENTRYORDERCODE,
+    		OWNERCODE,
+    		WAREHOUSECODE,
+    		ORDERTYPE,
+    		EXPECTSTARTTIME,
+    		SUPPLIERCODE,
+    		NAME,
+    		MOBILE,
+    		PROVINCE,
+    		CITY,
+    		DETAILADDRESS,
+    		OPERATORNAME,
+    		DESCRIPT
+    	 from BOS_E3_PURCHASE
+    	where E3STATUS=1 and ROWNUM &lt;= 1000
+    	order by ENTRYORDERCODE
+    </select>
+    <select id="getBOS_E3_PURCHASE_detail" parameterClass="String"
+            resultClass="java.util.HashMap">
+    	select ID,
+    		ITEMCODE,
+    		PLANQTY,
+    		PRICE
+    	 from BOS_E3_PURCHASE
+    	where E3STATUS=1 and
+    		ENTRYORDERCODE=#value#
+    </select>
+    <select id="getBOS_E3_RETPUR"
+            resultClass="java.util.HashMap">
+    	select distinct
+    		DELIVERYORDERCODE,
+    		OWNERCODE,
+    		WAREHOUSECODE,
+    		ORDERTYPE,
+    		CREATETIME,
+    		SUPPLIERCODE,
+    		NAME,
+    		MOBILE,
+    		PROVINCE,
+    		CITY,
+    		DETAILADDRESS,
+    		OPERATORNAME,
+    		DESCRIPT
+    	 from BOS_E3_RETPUR
+    	where E3STATUS=1 and ROWNUM &lt;= 1000
+    	order by DELIVERYORDERCODE
+    </select>
+    <select id="getBOS_E3_RETPUR_detail" parameterClass="String"
+            resultClass="java.util.HashMap">
+    	select ID,
+    		ITEMCODE,
+    		PLANQTY,
+    		PRICE
+    	 from BOS_E3_RETPUR
+    	where E3STATUS=1 and
+    		DELIVERYORDERCODE=#value#
+    </select>
+    <select id="getBOS_E3_SALE"
+            resultClass="java.util.HashMap">
+    	select distinct
+    		DELIVERYORDERCODE,
+    		OWNERCODE,
+    		WAREHOUSECODE,
+    		ORDERTYPE,
+    		CREATETIME,
+    		SUPPLIERCODE,
+    		CUSTOMERCODE,
+    		NAME,
+    		MOBILE,
+    		PROVINCE,
+    		CITY,
+    		DETAILADDRESS,
+    		OPERATORNAME,
+    		DESCRIPT
+    	 from BOS_E3_SALE
+    	where E3STATUS=1 and ROWNUM &lt;= 1000
+    	order by DELIVERYORDERCODE
+    </select>
+    <select id="getBOS_E3_SALE_detail" parameterClass="String"
+            resultClass="java.util.HashMap">
+    	select ID,
+    		ITEMCODE,
+    		PLANQTY,
+    		PRICE
+    	 from BOS_E3_SALE
+    	where E3STATUS=1 and
+    		DELIVERYORDERCODE=#value#
+    </select>
+    <select id="getBOS_E3_RETSALE"
+            resultClass="java.util.HashMap">
+    	select distinct
+    		ENTRYORDERCODE,
+    		ORDERTYPE,
+    		EXPECTSTARTTIME,
+    		WAREHOUSECODE,
+    		SUPPLIERCODE,
+    		OPERATORNAME,
+    		CUSTOMERCODE,
+    		NAME,
+    		MOBILE,
+    		PROVINCE,
+    		CITY,
+    		DETAILADDRESS,
+    		DESCRIPT
+    	 from BOS_E3_RETSALE
+    	where E3STATUS=1 and ROWNUM &lt;= 1000
+    	order by ENTRYORDERCODE
+    </select>
+    <select id="getBOS_E3_RETSALE_detail" parameterClass="String"
+            resultClass="java.util.HashMap">
+    	select ID,
+    		ITEMCODE,
+    		PLANQTY,
+    		PRICE
+    	 from BOS_E3_RETSALE
+    	where E3STATUS=1 and
+    		ENTRYORDERCODE=#value#
+    </select>
+
+
+    <update id="upstatus" parameterClass="java.util.HashMap">
+        update $table$
+        set E3STATUS=#status#
+        <isPropertyAvailable property="readtime" prepend=",">
+            READTIME = sysdate
+        </isPropertyAvailable>
+        <isPropertyAvailable property="writetime" prepend=",">
+            WRITETIME = sysdate
+        </isPropertyAvailable>
+        <isPropertyAvailable property="errorinfo" prepend=",">
+            ERR_INFO = #errorinfo#
+        </isPropertyAvailable>
+        <isNotEmpty property="descript" prepend=",">
+            DESCRIPT = #descript#
+        </isNotEmpty>
+        where ID=#id#
+    </update>
+    <update id="upstatus2" parameterClass="java.util.HashMap">
+        update $table$
+        set E3STATUS=#status#
+        <isPropertyAvailable property="readtime" prepend=",">
+            READTIME = sysdate
+        </isPropertyAvailable>
+        <isPropertyAvailable property="writetime" prepend=",">
+            WRITETIME = sysdate
+        </isPropertyAvailable>
+        <isPropertyAvailable property="errorinfo" prepend=",">
+            ERR_INFO = #errorinfo#
+        </isPropertyAvailable>
+        <isNotEmpty property="descript" prepend=",">
+            DESCRIPT = #descript#
+        </isNotEmpty>
+        where $keyname$=#id#
+    </update>
+
+
+    <insert id="insertE3_BOS_STORE" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_STORE
+    	(STORE_CODE,STORE_NAME,IS_O2O_E3,E3STATUS,WRITETIME)
+    	values(
+    		#STORE_CODE#,
+    		#STORE_NAME#,
+    		#IS_O2O_E3#,
+    		1,
+    		sysdate
+    	)
+    </insert>
+
+
+    <insert id="insertE3_BOS_TRANCANCEL" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_TRANCANCEL
+    	(DOCNO_E3,E3STATUS,WRITETIME)
+    	values(
+    		#DOCNO_E3#,
+    		1,
+    		sysdate
+    	)
+    </insert>
+
+
+    <insert id="insertE3_BOS_STOREPDT" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_STOREPDT
+    	(STORE_CODE,STORE_NAME,PRODUCT_CODE,PRODUCT_NAME,IS_O2O_E3,E3STATUS,WRITETIME)
+    	values(
+    		#STORE_CODE#,
+    		#STORE_NAME#,
+    		#PRODUCT_CODE#,
+    		#PRODUCT_NAME#,
+    		#IS_O2O_E3#,
+    		1,
+    		sysdate
+    	)
+    </insert>
+    <insert id="insertE3_BOS_TRANSFER" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_TRANSFER
+    	(C_ORIG_CODE,C_DEST_CODE,DOCNO_E3,BILLDATE,C_TRANSFERTYPE,
+    	M_PRODUCTALIAS,QTY,QTYOUT,QTYIN,TYPE,E3STATUS,WRITETIME)
+    	values(
+    		#C_ORIG_CODE#,
+    		#C_DEST_CODE#,
+    		#DOCNO_E3#,
+    		to_date(#BILLDATE#,'yyyy-mm-dd'),
+    		#C_TRANSFERTYPE#,
+    		#M_PRODUCTALIAS#,
+    		#QTY#,
+    		#QTYOUT#,
+    		#QTYIN#,
+    		#TYPE#,
+    		1,
+    		sysdate
+    	)
+    </insert>
+    <insert id="insertE3_BOS_TRANQTY" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_TRANQTY
+    	(DOCNO,DOCNO_E3,DATEOUT,
+    	M_PRODUCTALIAS,QTYOUT,QTYIN,E3STATUS,WRITETIME)
+    	values(
+    		#DOCNO#,
+    		#DOCNO_E3#,
+    		to_date(#DATEOUT#,'yyyy-mm-dd'),
+    		#M_PRODUCTALIAS#,
+    		#QTYOUT#,
+    		#QTYIN#,
+    		1,
+    		sysdate
+    	)
+    </insert>
+    <insert id="insertE3_BOS_CLOSE" parameterClass="java.util.HashMap">
+        insert into E3_BOS_CLOSE
+        (
+        <isPropertyAvailable property="Docno">
+            DOCNO,
+        </isPropertyAvailable>
+        E3CODE,C_STORE_CODE,
+        BILLDATE,OUTDATE,IS_CLOSE,
+        <isPropertyAvailable property="STATUS">
+            STATUS,
+        </isPropertyAvailable>
+        E3STATUS,WRITETIME)
+        values(
+        <isPropertyAvailable property="DOCNO">
+            #DOCNO#,
+        </isPropertyAvailable>
+        #E3CODE#,
+        #C_STORE_CODE#,
+        to_date(#BILLDATE#,'yyyy-mm-dd'),
+        to_date(#OUTDATE#,'yyyy-mm-dd'),
+        #IS_CLOSE#,
+        <isPropertyAvailable property="STATUS">
+            #STATUS#,
+        </isPropertyAvailable>
+        1,
+        sysdate
+        )
+    </insert>
+    <insert id="insertE3_BOS_CLOSEM" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_CLOSEM
+    	(E3CODE,M_PRODUCTALIAS,CQTY)
+    	values(
+    		#E3CODE#,
+    		#M_PRODUCTALIAS#,
+    		#CQTY#
+    	)
+    </insert>
+    <insert id="insertM_E3CLOSER" parameterClass="java.util.HashMap">
+    	insert into M_E3CLOSER
+    	(E3CODE,C_STORE_CODE,IS_CLOSE,E3STATUS,WRITETIME)
+    	values(
+    		#E3CODE#,
+    		#C_STORE_CODE#,
+    		#IS_CLOSE#,
+    		1,
+    		sysdate
+    	)
+    </insert>
+    <insert id="insertM_E3CLOSERM" parameterClass="java.util.HashMap">
+    	insert into M_E3CLOSERM
+    	(E3CODE,M_PRODUCTALIAS,UQTY)
+    	values(
+    		#E3CODE#,
+    		#M_PRODUCTALIAS#,
+    		#UQTY#
+    	)
+    </insert>
+    <insert id="insertE3_BOS_RETSALE" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_RETSALE
+    	(E3CODE,C_ORIG_CODE,C_ORIG_NAME,E3STATUS,WRITETIME)
+    	values(
+    		#E3CODE#,
+    		#C_ORIG_CODE#,
+    		#C_ORIG_NAME#,
+    		1,
+    		sysdate
+    	)
+    </insert>
+    <insert id="insertE3_BOS_RETSALEITEM" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_RETSALEITEM
+    	(E3CODE,M_PRODUCTALIAS,QTY)
+    	values(
+    		#E3CODE#,
+    		#M_PRODUCTALIAS#,
+    		#QTY#
+    	)
+    </insert>
+    <insert id="insertE3_BOS_PURIN" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_PURIN
+    	(
+    	 DOCNO,
+    	 DATEIN,
+    	 M_PRODUCTALIAS,
+    	 QTYIN,
+    	 E3STATUS,WRITETIME)
+    	values(
+    		#Docno#,
+    		to_date(#dateIn#,'yyyy-mm-dd hh24:mi:ss'),
+    		#ProductAlias#,
+    		#qtyIn#,
+    		1,
+    		sysdate
+    	)
+    </insert>
+    <insert id="insertE3_BOS_TRANQTY2" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_TRANQTY
+    	(
+    	 DOCNO,
+    	 DOCNO_E3,
+    	 DATEIN,
+    	 M_PRODUCTALIAS,
+    	 QTYIN,
+    	 E3STATUS,WRITETIME)
+    	values(
+    		#Docno#,
+    		#Docno_E3#,
+    		to_date(#dateIn#,'yyyy-mm-dd hh24:mi:ss'),
+    		#ProductAlias#,
+    		#qtyIn#,
+    		1,
+    		sysdate
+    	)
+    </insert>
+    <insert id="insertE3_BOS_RETSALEIN" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_RETSALEIN
+    	(
+    	 ORDERTYPE,
+    	 DOCNO,
+    	 DATEIN,
+    	 M_PRODUCTALIAS,
+    	 QTYIN,
+    	 E3STATUS,WRITETIME)
+    	values(
+    		#orderType#,
+    		#Docno#,
+    		to_date(#dateIn#,'yyyy-mm-dd hh24:mi:ss'),
+    		#ProductAlias#,
+    		#qtyIn#,
+    		1,
+    		sysdate
+    	)
+    </insert>
+    <insert id="insertE3_BOS_RETPUROUT" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_RETPUROUT
+    	(
+    	 DOCNO,
+    	 DATEOUT,
+    	 M_PRODUCTALIAS,
+    	 QTYOUT,
+    	 E3STATUS,WRITETIME)
+    	values(
+    		#Docno#,
+    		to_date(#dateOut#,'yyyy-mm-dd hh24:mi:ss'),
+    		#ProductAlias#,
+    		#qtyOut#,
+    		1,
+    		sysdate
+    	)
+    </insert>
+    <insert id="insertE3_BOS_SALEOUT" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_SALEOUT
+    	(
+    	 ORDERTYPE,
+    	 DOCNO,
+    	 DATEOUT,
+    	 M_PRODUCTALIAS,
+    	 QTYOUT,
+    	 E3STATUS,WRITETIME)
+    	values(
+    		#orderType#,
+    		#Docno#,
+    		to_date(#dateOut#,'yyyy-mm-dd hh24:mi:ss'),
+    		#ProductAlias#,
+    		#qtyOut#,
+    		1,
+    		sysdate
+    	)
+    </insert>
+    <insert id="insertE3_BOS_INVENTORY" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_INVENTORY
+    	(
+    	 DOCNO_E3,
+    	 C_STORE,
+    	 BILLDATE,
+    	 M_PRODUCTALIAS,
+    	 QTYOUT,
+    	 DESCRIPT,DOCTYPE,
+    	 E3STATUS,WRITETIME)
+    	values(
+    		#DocnoE3#,
+    		#store#,
+    		to_date(#billdate#,'yyyy-mm-dd hh24:mi:ss'),
+    		#ProductAlias#,
+    		#qtyOut#,
+    		#remark#,
+    		#checkOrderId#,
+    		1,
+    		sysdate
+    	)
+    </insert>
+    <insert id="insertE3_BOS_RETAIL" parameterClass="java.util.HashMap">
+        insert into E3_BOS_RETAIL
+        (
+        DELIVERYORDERCODE,
+        WAREHOUSECODE,
+        RETAILBILLTYPE,
+        PLACEORDERTIME,
+        PAYTIME,
+        ITEMCODE,
+        PLANQTY,
+        ACTUALPRICE,
+
+        RECEIVER_NAME,
+        SOREFERENCE4,
+        C_PROVINCE_ID,
+        C_CITY_ID,
+        RECEIVER_DISTRICT,
+        RECEIVER_ZIP,
+        RECEIVER_ADDRESS,
+        totalAmount,
+        freight,
+
+        <isNotEmpty property="shopNick">
+            shopNick,
+        </isNotEmpty>
+        <isNotEmpty property="shop_nick">
+            shop_nick,
+        </isNotEmpty>
+        <isNotEmpty property="buyer_nick">
+            buyer_nick,
+        </isNotEmpty>
+
+        DESCRIPT,
+        E3STATUS,WRITETIME,expressCode,logisticsCode,logisticsName)
+        values(
+        #deliveryOrderCode#,
+        #warehouseCode#,
+        #RETAILBILLTYPE#,
+        to_date(#placeOrderTime#,'yyyy-mm-dd hh24:mi:ss'),
+        to_date(#payTime#,'yyyy-mm-dd hh24:mi:ss'),
+        #itemCode#,
+        #planQty#,
+        #actualPrice#,
+
+        #receiverName#,
+        #soReference4#,
+        #province#,
+        #city#,
+        #area#,
+        #zip#,
+        #address#,
+        #totalAmount#,
+        #freight#,
+
+        <isNotEmpty property="shopNick">
+            #shopNick#,
+        </isNotEmpty>
+        <isNotEmpty property="shop_nick">
+            #shop_nick#,
+        </isNotEmpty>
+        <isNotEmpty property="buyer_nick">
+            #buyer_nick#,
+        </isNotEmpty>
+
+        #remark#,
+        1,
+        sysdate,
+        #expressCode#,#logisticsCode#,#logisticsName#
+        )
+    </insert>
+    <insert id="insertE3_BOS_RETAIL_YM" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_RETAIL_YM
+    	(
+    	 E3CODE,
+    	 E3OLDCODE,
+    	 E3BGCODE,
+    	 C_ORIG_CODE,
+    	 C_ORIG_NAME,
+    	 M_PRODUCTALIAS,
+    	 PRICE,
+    	 RETQTY,
+    	 TOT_AMT_PRICE,
+    	 E3STATUS,WRITETIME)
+    	values(
+    		#E3CODE#,
+    		#E3OLDCODE#,
+    		#E3BGCODE#,
+    		#C_ORIG_CODE#,
+    		#C_ORIG_NAME#,
+    		#M_PRODUCTALIAS#,
+    		#PRICE#,
+    		#RETQTY#,
+    		#TOT_AMT_PRICE#,
+    		1,
+    		sysdate
+    	)
+    </insert>
+    <insert id="insertE3_BOS_RETAIL_WM" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_RETAIL_WM
+    	(
+    	 E3BGCODE,
+    	 C_ORIG_CODE,
+    	 C_ORIG_NAME,
+    	 M_PRODUCTALIAS,
+    	 RETQTY,
+    	 E3STATUS,WRITETIME)
+    	values(
+    		#E3BGCODE#,
+    		#C_ORIG_CODE#,
+    		#C_ORIG_NAME#,
+    		#M_PRODUCTALIAS#,
+    		#RETQTY#,
+    		1,
+    		sysdate
+    	)
+    </insert>
+
+    <insert id="insertE3_BOS_LOCKCFM" parameterClass="java.util.HashMap">
+        insert into E3_BOS_LOCKCFM
+        (
+        BILLCODE,
+        WAREHOUSECODE,
+        OPTYPE,
+        BILLDATE,
+        WRITETIME,
+        IS_ALLREAD
+        <isNotEmpty property="SKUCODE" prepend=",">
+            SKUCODE
+        </isNotEmpty>
+        <isNotEmpty property="QTY" prepend=",">
+            QTY_CONFIRM
+        </isNotEmpty>
+        <isNotEmpty property="ERRINFO" prepend=",">
+            ERR_INFO
+        </isNotEmpty>
+        <isNotEmpty property="NOTE" prepend=",">
+            NOTE
+        </isNotEmpty>
+        )values(
+        #BILLCODE#,
+        #WAREHOUSECODE#,
+        #OPTYPE#,
+        #BILLDATE#,
+        sysdate,
+        #IS_ALLREAD#
+        <isNotEmpty property="SKUCODE" prepend=",">
+            #SKUCODE#
+        </isNotEmpty>
+        <isNotEmpty property="QTY" prepend=",">
+            #QTY#
+        </isNotEmpty>
+        <isNotEmpty property="ERRINFO" prepend=",">
+            #ERRINFO#
+        </isNotEmpty>
+        <isNotEmpty property="NOTE" prepend=",">
+            #NOTE#
+        </isNotEmpty>
+        )
+    </insert>
+
+    <insert id="insertE3_BOS_SOOUT" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_SOOUT
+    	(
+    		BOS_DOCNO,
+    		SKU,
+    		QTYOUT,
+    		DATEOUT,
+    		DATETIME,
+    		EXPRESS_NAME,
+    		FASTNO,
+    		CREATIONDATE
+    	)values(
+    		#BOS_DOCNO#,
+    		#SKU#,
+    		#QTYOUT#,
+    		#DATEOUT#,
+    		#DATETIME#,
+    		#EXPRESS_NAME#,
+    		#FASTNO#,
+    		sysdate
+    	)
+    </insert>
+    <insert id="insertE3_BOS_SOLESS" parameterClass="java.util.HashMap">
+    	insert into E3_BOS_SOLESS
+    	(
+    		BOS_DOCNO,
+    		RET_REASON,
+    		CREATIONDATE
+    	)values(
+    		#BOS_DOCNO#,
+    		#RET_REASON#,
+    		sysdate
+    	)
+    </insert>
+
+    <select id="selectMaxID" parameterClass="String"
+            resultClass="Long">
+    	select max(ID) from $value$
+    </select>
+
+    <select id="getBOS_E3_SO"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_SO
+    	where READSTATUS=0 and ROWNUM &lt;= 1000
+    </select>
+    <select id="getBOS_E3_SO_detail" parameterClass="String"
+            resultClass="java.util.HashMap">
+    	select * from BOS_E3_SOITEM
+    	where BOS_E3_SO_ID=#value#
+    </select>
+    <update id="upstatusYun" parameterClass="java.util.HashMap">
+        update $table$
+        set READSTATUS=#status#
+        <isPropertyAvailable property="readtime" prepend=",">
+            READTIME = sysdate
+        </isPropertyAvailable>
+        <isPropertyAvailable property="errorinfo" prepend=",">
+            ERR_MSG = #errorinfo#
+        </isPropertyAvailable>
+        where ID=#id#
+    </update>
+
+</sqlMap>  
